@@ -1,23 +1,23 @@
 // Transaction
 class transaction;
-    rand bit oper;
-    bit wr_en, rd_en;
+    rand bit       oper;
+    bit            wr_en, rd_en;
     rand bit [7:0] din;
-    bit [7:0] dout;
-    bit full, empty;
+    bit      [7:0] dout;
+    bit            full, empty;
 
     constraint control_oper{
         oper dist {0:/50, 1:/50};
     }
 
     function transaction copy();
-        copy = new();
-        copy.oper = this.oper;
+        copy       = new();
+        copy.oper  = this.oper;
         copy.wr_en = this.wr_en;
         copy.rd_en = this.rd_en;
-        copy.din = this.din;
-        copy.dout = this.dout;
-        copy.full = this.full;
+        copy.din   = this.din;
+        copy.dout  = this.dout;
+        copy.full  = this.full;
         copy.empty = this.empty;
     endfunction
 
@@ -32,7 +32,7 @@ class generator;
     event next;
 
     int count = 0;
-    int i = 0;
+    int i     = 0;
 
     function new(mailbox #(transaction) mbx);
         this.mbx = mbx;
@@ -62,21 +62,20 @@ class driver;
     endfunction
 
     task reset();
-        fif.rst <= 1'b1;
+        fif.rst   <= 1'b1;
         fif.wr_en <= 1'b0;
         fif.rd_en <= 1'b0;
-        fif.din <= 8'b0;
+        fif.din   <= 8'b0;
         repeat(5) @(posedge fif.clk);
-        fif.rst <= 1'b0;
+        fif.rst   <= 1'b0;
     endtask
 
     task write();
         @(posedge fif.clk);
-        fif.rst <= 1'b0;
+        fif.rst   <= 1'b0;
         fif.wr_en <= 1'b1;
         fif.rd_en <= 1'b0;
-        assert(trans.randomize()) else $error("[DRV]: Randomization Failed");
-        fif.din <= trans.copy().din;
+        fif.din   <= trans.din;
         @(posedge fif.clk);
         fif.wr_en <= 1'b0;
         @(posedge fif.clk);
@@ -84,7 +83,7 @@ class driver;
 
     task read();
         @(posedge fif.clk);
-        fif.rst <= 1'b0;
+        fif.rst   <= 1'b0;
         fif.wr_en <= 1'b0;
         fif.rd_en <= 1'b1;
         @(posedge fif.clk);
@@ -120,10 +119,10 @@ class monitor;
             repeat(2) @(posedge fif.clk);
             trans.wr_en = fif.wr_en;
             trans.rd_en = fif.rd_en;
-            trans.full = fif.full;
+            trans.full  = fif.full;
             trans.empty = fif.empty;
             @(posedge fif.clk);
-            trans.dout = fif.dout;
+            trans.dout  = fif.dout;
             mbx.put(trans);
         end
     endtask
@@ -157,7 +156,7 @@ class scoreboard;
             end
             
             if(trans.rd_en == 1'b1) begin
-                if(trans.empty = 1'b0) begin
+                if(trans.empty == 1'b0) begin
                     temp = din.pop_back();
                 
                 if(trans.dout == temp) $display("[SCO]: Data Matched");
@@ -201,8 +200,8 @@ class environment;
     sco = new(msmbx);
 
     this.fif = fif;
-    drv.fif = this.fif;
-    mon.fif = this.fif;
+    drv.fif  = this.fif;
+    mon.fif  = this.fif;
 
     gen.next = next;
     sco.next = next;
