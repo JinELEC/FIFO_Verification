@@ -157,14 +157,14 @@ class scoreboard;
           temp = din.pop_back();
           
           if (trans.dout == temp)
-            $display("[SCO] : DATA MATCH");
+			  $display("[SCO] : Data Matched");
           else begin
-            $error("[SCO] : DATA MISMATCH");
+			  $error("[SCO] : Data Mismatch");
             err++;
           end
         end
         else begin
-          $display("[SCO] : FIFO IS EMPTY");
+			$display("[SCO] : FIFO is empty");
         end
       end
       -> next;
