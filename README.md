@@ -16,4 +16,4 @@ The environment follows a modular testbench architecture that includes the follo
 ## Waveform
 ![FIFO waveform](doc/FIFO_waveform.png)
 
-
+> Note: The simulation was performed using **EDA Playground**, as no SystemVerilog simulator
