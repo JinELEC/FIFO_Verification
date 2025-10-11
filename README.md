@@ -14,7 +14,7 @@ The environment follows a modular testbench architecture that includes the follo
 ![FIFO](doc/FIFO.png)
 
 ## Testbench Architecture
-![Testbench_Architecture](doc/Testbench_Architecture.png)
+![Testbench_Architecture](doc/Testbench_Architecture.PNG)
 
 ## Waveform
 ![FIFO waveform](doc/FIFO_waveform.png)
