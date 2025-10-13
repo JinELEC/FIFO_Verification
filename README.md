@@ -19,4 +19,4 @@ The modular testbench architecture that includes the following components:
 ## Waveform
 ![FIFO waveform](doc/FIFO_waveform.png)
 
-> Note: The simulation was performed using **EDA Playground**, as no SystemVerilog simulator
+> Note: The simulation was performed using **EDA Playground**, as no SystemVerilog simulator.
