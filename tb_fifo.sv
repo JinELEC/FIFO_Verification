@@ -61,7 +61,7 @@ class driver;
         this.mbx = mbx;
     endfunction
 
-    task reset();
+    task reset(); // reset DUT
         fif.rst   <= 1'b1;
         fif.wr_en <= 1'b0;
         fif.rd_en <= 1'b0;
@@ -70,7 +70,7 @@ class driver;
         fif.rst   <= 1'b0;
     endtask
 
-    task write();
+    task write(); // write to memory
         @(posedge fif.clk);
         fif.rst   <= 1'b0;
         fif.wr_en <= 1'b1;
@@ -81,7 +81,7 @@ class driver;
         @(posedge fif.clk);
     endtask
 
-    task read();
+    task read(); // read from memory
         @(posedge fif.clk);
         fif.rst   <= 1'b0;
         fif.wr_en <= 1'b0;
@@ -140,7 +140,7 @@ class scoreboard;
     endfunction
 
     bit [7:0] din[$];
-    bit [7:0] temp;
+    bit [7:0] temp; // temporary store FIFO value
     int err = 0;
 
     task run();
