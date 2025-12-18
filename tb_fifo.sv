@@ -169,8 +169,8 @@ class scoreboard;
                 $display("[SCO]: FIFO is empty");
             end
             end
+            -> next;
         end
-        -> next;
     endtask
 
 endclass
