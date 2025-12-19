@@ -32,7 +32,6 @@ class generator;
     event sconext;
 
     int count = 0;
-    int i     = 0;
 
     function new(mailbox #(transaction) mbx);
         this.mbx = mbx;
@@ -42,7 +41,6 @@ class generator;
     task run();
         repeat(count) begin
             assert(trans.randomize()) else $error("[GEN]: Randomization Failed");
-            i++;
             mbx.put(trans.copy());
             @(sconext);
         end
