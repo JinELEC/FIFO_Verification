@@ -29,7 +29,7 @@ class generator;
     mailbox #(transaction) mbx;
     
     event done;
-    event next;
+    event sconext;
 
     int count = 0;
     int i     = 0;
@@ -44,7 +44,7 @@ class generator;
             assert(trans.randomize()) else $error("[GEN]: Randomization Failed");
             i++;
             mbx.put(trans.copy());
-            @(next);
+            @(sconext);
         end
         -> done;
     endtask
@@ -169,7 +169,7 @@ class scoreboard;
                 $display("[SCO]: FIFO is empty");
             end
             end
-            -> next;
+            -> sconext;
         end
     endtask
 
@@ -203,8 +203,8 @@ class environment;
     drv.fif  = this.fif;
     mon.fif  = this.fif;
 
-    gen.next = next;
-    sco.next = next;
+    gen.sconext = next;
+    sco.sconext = next;
 
     endfunction
 
