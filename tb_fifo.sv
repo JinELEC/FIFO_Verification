@@ -1,21 +1,70 @@
-// Transaction
-class transaction;
-    rand bit       oper;
-    bit            wr_en, rd_en;
-    rand bit [7:0] din;
-    bit      [7:0] dout;
-    bit            full, empty;
+// --------------------- Interface ---------------------
+interface fifo_if(input logic clk);
+    logic       rst; // active high
+    logic       wr_en;
+    logic       rd_en;
+    logic [7:0] din;
+    logic [7:0] dout;
+    logic       full;
+    logic       empty;
 
+    clocking cb @(posedge clk);
+        default input #1ns output #1ns;
+
+        // signals for driver
+        output       rst; 
+        output       wr_en;
+        output       rd_en;
+        output       din;
+
+        // signals for monitor
+        input        dout;
+        input        full;
+        input        empty;
+        input        din;
+        input        wr_en;
+        input        rd_en;
+
+    endclocking
+        
+
+endinterface
+
+// --------------------- Transaction ---------------------
+class transaction;
+    rand bit [7:0] din; // input 
+    rand bit       oper;
+    rand bit       wr_en;
+    rand bit       rd_en;
+    bit      [7:0] dout;
+    bit            full; 
+    bit            empty;
+
+    // display function
+    function void display(input string component);
+        $display("[%s]: wr_en: %b\t rd_en: %b\t din: %d", component, wr_en, rd_en, din);
+    endfunction
+
+    // constraint
     constraint control_oper{
-        oper dist {0:/50, 1:/50};
+        oper dist {0:=50, 1:=50};
+        if(oper == 1'b1) {
+            wr_en == 1'b1;
+            rd_en == 1'b0;
+        }
+        else {
+            wr_en == 1'b0;
+            rd_en == 1'b1;
+        }
     }
 
+    // deep copy
     function transaction copy();
-        copy       = new();
+        copy = new();
+        copy.din   = this.din;
         copy.oper  = this.oper;
         copy.wr_en = this.wr_en;
         copy.rd_en = this.rd_en;
-        copy.din   = this.din;
         copy.dout  = this.dout;
         copy.full  = this.full;
         copy.empty = this.empty;
@@ -23,25 +72,24 @@ class transaction;
 
 endclass
 
-// Generator
+// --------------------- Generator ---------------------
 class generator;
-    transaction trans;
+    transaction tr;
     mailbox #(transaction) mbx;
-    
-    event done;
-    event sconext;
+    event done, sconext;
 
-    int count = 0;
-
+    // constructor
     function new(mailbox #(transaction) mbx);
         this.mbx = mbx;
-        trans = new();
+        tr = new();
     endfunction
 
+    // randomization
     task run();
-        repeat(count) begin
-            assert(trans.randomize()) else $error("[GEN]: Randomization Failed");
-            mbx.put(trans.copy());
+        repeat(20) begin
+            assert(tr.randomize()) else $display("Randomization Failed");
+            tr.display("GEN");
+            mbx.put(tr.copy());
             @(sconext);
         end
         -> done;
@@ -49,50 +97,59 @@ class generator;
 
 endclass
 
-// Driver
+// --------------------- Driver ---------------------
 class driver;
     virtual fifo_if fif;
-    transaction trans;
+    transaction tr;
     mailbox #(transaction) mbx;
-
+    event drvnext;
+   
+    // constructor
     function new(mailbox #(transaction) mbx);
         this.mbx = mbx;
     endfunction
 
-    task reset(); // reset DUT
-        fif.rst   <= 1'b1;
-        fif.wr_en <= 1'b0;
-        fif.rd_en <= 1'b0;
-        fif.din   <= 8'b0;
-        repeat(5) @(posedge fif.clk);
-        fif.rst   <= 1'b0;
+    // reset DUT
+    task reset();
+        fif.cb.rst   <= 1'b1; // trigger reset
+        fif.cb.wr_en <= 1'b0;
+        fif.cb.rd_en <= 1'b0;
+        fif.cb.din   <= 8'b0;
+
+        repeat(3) @(fif.cb); // keep for 3-clock
+
+        fif.cb.rst <= 1'b0;
+        @(fif.cb); // stable for after reset
     endtask
 
-    task write(); // write to memory
-        @(posedge fif.clk);
-        fif.rst   <= 1'b0;
-        fif.wr_en <= 1'b1;
-        fif.rd_en <= 1'b0;
-        fif.din   <= trans.din;
-        @(posedge fif.clk);
-        fif.wr_en <= 1'b0;
-        @(posedge fif.clk);
+    // write 
+    task write();
+            @(fif.cb);
+            fif.cb.rst   <= 1'b0;
+            fif.cb.wr_en <= 1'b1;
+            fif.cb.rd_en <= 1'b0;
+            fif.cb.din   <= tr.din;
+            @(fif.cb);
+            fif.cb.wr_en <= 1'b0;
+            @(fif.cb);
     endtask
 
-    task read(); // read from memory
-        @(posedge fif.clk);
-        fif.rst   <= 1'b0;
-        fif.wr_en <= 1'b0;
-        fif.rd_en <= 1'b1;
-        @(posedge fif.clk);
-        fif.rd_en <= 1'b0;
-        @(posedge fif.clk);
+    // read
+    task read();
+            @(fif.cb);
+            fif.cb.rst   <= 1'b0;
+            fif.cb.wr_en <= 1'b0;
+            fif.cb.rd_en <= 1'b1;
+            @(fif.cb);
+            fif.cb.rd_en <= 1'b0;
+            @(fif.cb);
     endtask
 
+    // main task
     task run();
         forever begin
-            mbx.get(trans);
-            if(trans.oper == 1'b1)
+            mbx.get(tr);
+            if(tr.oper == 1'b1)
                 write();
             else
                 read();
@@ -101,115 +158,120 @@ class driver;
 
 endclass
 
-// Monitor
+// --------------------- Monitor ---------------------
 class monitor;
     virtual fifo_if fif;
-    transaction trans;
+    transaction tr;
     mailbox #(transaction) mbx;
 
+    // constructor
     function new(mailbox #(transaction) mbx);
         this.mbx = mbx;
     endfunction
 
+    // main task
     task run();
-        trans = new();
         forever begin
-            repeat(2) @(posedge fif.clk);
-            trans.wr_en = fif.wr_en;
-            trans.rd_en = fif.rd_en;
-            trans.full  = fif.full;
-            trans.empty = fif.empty;
-            @(posedge fif.clk);
-            trans.dout  = fif.dout;
-            mbx.put(trans);
+            tr = new();
+                @(fif.cb);
+                if(fif.cb.wr_en || fif.cb.rd_en) begin
+                tr.wr_en = fif.cb.wr_en;
+                tr.rd_en = fif.cb.rd_en;
+                tr.full  = fif.cb.full;
+                tr.empty = fif.cb.empty;
+                tr.din   = fif.cb.din;
+
+                if(fif.cb.rd_en) begin
+                @(fif.cb);
+                tr.dout = fif.cb.dout;
+                end
+                else tr.dout = fif.cb.dout;
+                mbx.put(tr);
+                end
         end
     endtask
 
 endclass
 
-// Scoreboard
+// --------------------- Scoreboard ---------------------
 class scoreboard;
-    transaction trans;
+    transaction tr;
     mailbox #(transaction) mbx;
-    event next;
+    event sconext;
 
+    // constructor
     function new(mailbox #(transaction) mbx);
         this.mbx = mbx;
     endfunction
 
-    bit [7:0] din[$];
-    bit [7:0] temp; // temporary store FIFO value
-    int err = 0;
+    bit [7:0] din[$]; // queue
+    bit [7:0] temp;   // temporarly store value
 
     task run();
         forever begin
-            mbx.get(trans);
-            if(trans.wr_en == 1'b1) begin
-                if(trans.full == 1'b0) begin
-                    din.push_front(trans.din);
+            mbx.get(tr);
+            if(tr.wr_en == 1'b1) begin
+                if(tr.full != 1'b1) begin
+                    din.push_back(tr.din); // input data from backward
                 end
                 else begin
                     $display("[SCO]: FIFO is full");
                 end
             end
-            
-            if(trans.rd_en == 1'b1) begin
-                if(trans.empty == 1'b0) begin
-                    temp = din.pop_back();
-                
-                if(trans.dout == temp) $display("[SCO]: Data Matched");
-                else begin
-                    $error("[SCO]: Data Mismatched");
-                    err++;
+
+            if(tr.rd_en == 1'b1) begin
+                if(tr.empty != 1'b1) begin
+                    temp = din.pop_front(); // output data from front
+
+                    if(tr.dout == temp) $display("[SCO]: Data Matched");
+                    else $display("[SCO]: Data Mismatched");
                 end
-                end
-            else begin
-                $display("[SCO]: FIFO is empty");
+            else $display("[SCO]: FIFO is empty");
             end
-            end
-            -> sconext;
+        -> sconext;
         end
     endtask
 
 endclass
 
-// Environment
+// --------------------- Environment ---------------------
 class environment;
+    virtual fifo_if fif;
+
     generator gen;
     driver drv;
     monitor mon;
     scoreboard sco;
 
+    mailbox #(transaction) gdmbx;
+    mailbox #(transaction) msmbx;
+
     event next;
 
-    mailbox #(transaction) gdmbx; // gen - drv
-    mailbox #(transaction) msmbx; // mon - sco
-
-    virtual fifo_if fif;
-
     function new(virtual fifo_if fif);
+        gdmbx = new();
+        msmbx = new();
 
-    gdmbx = new();
-    msmbx = new();
+        gen = new(gdmbx);
+        drv = new(gdmbx);
+        mon = new(msmbx);
+        sco = new(msmbx);
 
-    gen = new(gdmbx);
-    drv = new(gdmbx);
-    mon = new(msmbx);
-    sco = new(msmbx);
+        gen.sconext = next;
+        sco.sconext = next;
 
-    this.fif = fif;
-    drv.fif  = this.fif;
-    mon.fif  = this.fif;
-
-    gen.sconext = next;
-    sco.sconext = next;
-
+        this.fif = fif;
+        drv.fif = this.fif;
+        mon.fif = this.fif;
+    
     endfunction
 
+    // pre_test
     task pre_test();
         drv.reset();
     endtask
 
+    // test
     task test();
         fork
             gen.run();
@@ -219,45 +281,57 @@ class environment;
         join_any
     endtask
 
+    // post_test
     task post_test();
         wait(gen.done.triggered);
+        #100;
         $finish;
     endtask
 
+    // task top
     task run();
-        pre_test();
-        test();
-        post_test();
+        fork
+            pre_test();
+            test();
+            post_test();
+        join
     endtask
 
 endclass
 
-module tb_fifo;
-    fifo_if fif();
+// --------------------- Testbench top ---------------------
+module tb;
+    logic clk;
+    fifo_if fif(clk);
 
     fifo dut(
-        .clk            (fif.clk        ),
-        .rst            (fif.rst        ),
-        .wr_en          (fif.wr_en      ),
-        .rd_en          (fif.rd_en      ),
-        .din            (fif.din        ),
-        .dout           (fif.dout       ),
-        .full           (fif.full       ),
-        .empty          (fif.empty      )
+        .clk    (fif.clk        ),
+        .rst    (fif.rst        ),
+        .wr_en  (fif.wr_en      ),
+        .rd_en  (fif.rd_en      ),
+        .din    (fif.din        ),
+        .dout   (fif.dout       ),
+        .full   (fif.full       ),
+        .empty  (fif.empty      )
     );
 
-    initial begin   
-        fif.clk <= 1'b0;
+    initial begin
+        clk <= 1'b0;
     end
 
-    always #10 fif.clk <= ~fif.clk;
+    always #5 clk <= ~clk;
 
     environment env;
 
     initial begin
         env = new(fif);
-        env.gen.count = 30;
         env.run();
+    end
+    
+    // Stimulus
+    initial begin
+    $dumpfile("wave.vcd");     
+    $dumpvars(0, tb); 
     end
 
 endmodule
