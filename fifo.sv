@@ -38,16 +38,3 @@ assign empty = (cnt == 5'b0)  ? 1'b1 : 1'b0;
 assign full  = (cnt == 5'd16) ? 1'b1 : 1'b0;
 
 endmodule
-
-// Interface
-interface fifo_if;
-    logic       clk;
-    logic       rst;
-    logic       wr_en;
-    logic       rd_en;
-    logic [7:0] din;
-    logic [7:0] dout;
-    logic       full;
-    logic       empty;
-
-endinterface
