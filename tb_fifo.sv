@@ -21,9 +21,9 @@ interface fifo_if(input logic clk);
         input        dout;
         input        full;
         input        empty;
-        input        din;
-        input        wr_en;
-        input        rd_en;
+        // input        din;
+        // input        wr_en;
+        // input        rd_en;
 
     endclocking
         
@@ -56,7 +56,7 @@ class transaction;
             wr_en == 1'b0;
             rd_en == 1'b1;
         }
-    }
+    } 
 
     // deep copy
     function transaction copy();
@@ -86,7 +86,7 @@ class generator;
 
     // randomization
     task run();
-        repeat(20) begin
+        repeat(1000) begin
             assert(tr.randomize()) else $display("Randomization Failed");
             tr.display("GEN");
             mbx.put(tr.copy());
@@ -103,6 +103,8 @@ class driver;
     transaction tr;
     mailbox #(transaction) mbx;
     event drvnext;
+    bit [5:0] cnt = 5'b0;
+
    
     // constructor
     function new(mailbox #(transaction) mbx);
@@ -116,15 +118,15 @@ class driver;
         fif.cb.rd_en <= 1'b0;
         fif.cb.din   <= 8'b0;
 
-        repeat(3) @(fif.cb); // keep for 3-clock
+        repeat(5) @(fif.cb); // keep for 3-clock
 
-        fif.cb.rst <= 1'b0;
-        @(fif.cb); // stable for after reset
+        fif.cb.rst <= 1'b1;
+        // @(fif.cb); // stable for after reset
     endtask
 
     // write 
     task write();
-            @(fif.cb);
+            // @(fif.cb);
             fif.cb.rst   <= 1'b0;
             fif.cb.wr_en <= 1'b1;
             fif.cb.rd_en <= 1'b0;
@@ -149,10 +151,8 @@ class driver;
     task run();
         forever begin
             mbx.get(tr);
-            if(tr.oper == 1'b1)
-                write();
-            else
-                read();
+            if(tr.wr_en == 1'b1) write();
+            else if(tr.rd_en == 1'b1) read();
         end
     endtask
 
@@ -163,10 +163,12 @@ class monitor;
     virtual fifo_if fif;
     transaction tr;
     mailbox #(transaction) mbx;
+    mailbox #(transaction) mbx_;
 
     // constructor
-    function new(mailbox #(transaction) mbx);
+    function new(mailbox #(transaction) mbx, mailbox #(transaction) mbx_);
         this.mbx = mbx;
+        this.mbx_ = mbx_;
     endfunction
 
     // main task
@@ -174,19 +176,20 @@ class monitor;
         forever begin
             tr = new();
                 @(fif.cb);
-                if(fif.cb.wr_en || fif.cb.rd_en) begin
-                tr.wr_en = fif.cb.wr_en;
-                tr.rd_en = fif.cb.rd_en;
-                tr.full  = fif.cb.full;
-                tr.empty = fif.cb.empty;
-                tr.din   = fif.cb.din;
+                if(fif.wr_en || fif.rd_en) begin
+                tr.wr_en = fif.wr_en;
+                tr.rd_en = fif.rd_en;
+                tr.full  = fif.full;
+                tr.empty = fif.empty;
+                tr.din   = fif.din;
 
-                if(fif.cb.rd_en) begin
+                if(fif.rd_en) begin
                 @(fif.cb);
-                tr.dout = fif.cb.dout;
+                tr.dout = fif.dout;
                 end
-                else tr.dout = fif.cb.dout;
+                else tr.dout = fif.dout;
                 mbx.put(tr);
+                mbx_.put(tr); // to covergroup
                 end
         end
     endtask
@@ -234,6 +237,70 @@ class scoreboard;
 
 endclass
 
+// --------------------- Coverage ---------------------
+class my_coverage;
+    transaction tr;
+    mailbox #(transaction) mbx;
+
+    covergroup cg;
+        option.per_instance = 1;
+
+        cp_wr_en : coverpoint tr.wr_en {
+            bins zero = {0};
+            bins one  = {1};
+        }
+
+        cp_rd_en : coverpoint tr.rd_en {
+            bins zero = {0};
+            bins one  = {1};
+        }
+
+        cp_full : coverpoint tr.full {
+            bins zero = {0};
+            bins one  = {1};
+        }
+
+        cp_empty : coverpoint tr.empty {
+            bins zero = {0};
+            bins one  = {1};
+        }
+
+        cp_din   : coverpoint tr.din   { bins din = {[0:255]};  }
+        cp_dout  : coverpoint tr.dout  { bins dout = {[0:255]}; }
+
+        cross_wr_rd : cross cp_wr_en, cp_rd_en {
+            // both 0
+            bins both_zero = binsof(cp_wr_en.zero) && binsof(cp_rd_en.zero);
+
+            // only write
+            bins only_write = binsof(cp_wr_en.one) && binsof(cp_rd_en.zero);
+
+            // only read
+            bins only_read = binsof(cp_wr_en.zero) && binsof(cp_rd_en.one);
+
+            // both 1 
+            illegal_bins both_one = binsof(cp_wr_en.one) && binsof(cp_rd_en.one);
+        }
+    
+    endgroup
+
+     // constructor 
+    function new(mailbox #(transaction) mbx);
+        this.mbx = mbx;
+        cg = new();
+    endfunction
+
+    // main task
+    task run();
+        forever begin
+            mbx.get(tr);    
+            cg.sample();
+        end
+    endtask  
+
+endclass
+
+
 // --------------------- Environment ---------------------
 class environment;
     virtual fifo_if fif;
@@ -242,20 +309,24 @@ class environment;
     driver drv;
     monitor mon;
     scoreboard sco;
+    my_coverage cov;
 
-    mailbox #(transaction) gdmbx;
-    mailbox #(transaction) msmbx;
+    mailbox #(transaction) gdmbx; // gen - drv
+    mailbox #(transaction) msmbx; // mon - sco
+    mailbox #(transaction) mcmbx; // mon - cov
 
     event next;
 
     function new(virtual fifo_if fif);
         gdmbx = new();
         msmbx = new();
+        mcmbx = new();
 
         gen = new(gdmbx);
         drv = new(gdmbx);
-        mon = new(msmbx);
+        mon = new(msmbx, mcmbx);
         sco = new(msmbx);
+        cov = new(mcmbx);
 
         gen.sconext = next;
         sco.sconext = next;
@@ -278,20 +349,21 @@ class environment;
             drv.run();
             mon.run();
             sco.run();
+            cov.run();
         join_any
     endtask
 
     // post_test
     task post_test();
         wait(gen.done.triggered);
-        #100;
+        #1000;
         $finish;
     endtask
 
     // task top
     task run();
+        pre_test();
         fork
-            pre_test();
             test();
             post_test();
         join
