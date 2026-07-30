@@ -3,7 +3,7 @@
 ## Contents
 - [Introduction](#introduction)
 - [Verification Methodology](#verification-methodology)
-- [Verification_Result](#result)
+- [Result](#verification_result)
 - [Repository Structure](#repository-structure)
 - [Report](#report)
 
