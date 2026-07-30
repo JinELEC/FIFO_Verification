@@ -2,7 +2,6 @@
 
 ## Introduction
 This project verifies a parameterized synchronous FIFO using a SystemVerilog class-based verification environment. 
-
 A modular testbench architecture was built to validate the FIFO functionality through constrained-random stimulus, SystemVerilog Assertions (SVA), and coverage metrics. 
 
 ## Verification Methodology
