@@ -34,3 +34,10 @@ Coverage metrics were used to measure how much the design has been tested and ev
 | Total | 93.96 |
 
 ![Coverage Report](docs/coverage_summary.png)
+
+### Assertion Results
+Three Assertions (SVA) were applied to verify FIFO functional behaviour and protocol violations. 
+
+Among the three assertions, AS2 and AS3 were satisfied without any violation during simulation. However, AS1 reported 92 failures.
+
+Detailed assertion results and coverage analysis are available in `coverage_report.txt' and the verification report.
