@@ -1,4 +1,4 @@
-## FIFO Verification Project
+## FIFO Verification 
 
 This project is not only verify a FIFO (First-In-First-Out) memory, but also to understand and implement a SystemVerilog-class based testbench environment. 
 
