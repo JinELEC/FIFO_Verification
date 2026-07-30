@@ -3,7 +3,7 @@
 ## Contents
 - [Introduction](#introduction)
 - [Verification Methodology](#verification-methodology)
-- [Verification Result](#verification-result)
+- [Verification Results](#verification-results)
 - [Repository Structure](#repository-structure)
 - [Report](#report)
 
@@ -12,10 +12,10 @@ This project verifies a parameterized synchronous FIFO using a SystemVerilog cla
 A modular testbench architecture was built to validate the FIFO functionality through constrained-random stimulus, SystemVerilog Assertions (SVA), and coverage metrics. 
 
 ## Verification Methodology
-The modular testbench architecture includes the following components:
+The modular testbench architecture consists of following components:
 - **Generator:** Generates different input stimulus to be driven to DUT
-- **Driver:** Drives stimulus to the DUT
-- **Monitor:** Observes DUT signals and capture design activity
+- **Driver:** Drives stimuli to the DUT
+- **Monitor:** Observes DUT signals and captures design activity
 - **Scoreboard:** Compares DUT outputs with expected results
 - **Environment:** Contains all the verification components
 - **Interface:** Contains design signals that can be driven or monitored
@@ -29,7 +29,7 @@ Assertions were implemented to automatically verify specific conditions or proto
 ### Coverage
 Coverage metrics were used to measure how much the design has been tested and evaluate the verification completeness. 
 
-## Verification Result
+## Verification Results
 ### Coverage Summary
 | Metric | Value (%) |
 |--------|----------:|
@@ -43,9 +43,9 @@ Coverage metrics were used to measure how much the design has been tested and ev
 ![Coverage Report](docs/coverage_summary.png)
 
 ### Assertion Results
-Three Assertions (SVA) were applied to verify FIFO functional behaviour and protocol violations. 
+Three assertions (SVA) were applied to verify FIFO functional behaviour and protocol violations. 
 
-Among the three assertions, AS2 and AS3 were satisfied without any violation during simulation. However, AS1 reported 92 failures.
+Among the three assertions, AS2 and AS3 were satisfied without any violations during simulation. However, AS1 reported 92 failures.
 
 ## Repository Structure
 ```
@@ -70,4 +70,4 @@ FIFO_Verification/
 Detailed assertion results and coverage analysis are available in 
 [coverage_report.txt](docs/coverage_report.txt).
 
-The complete verification methodology, assertion analysis, coverage results, and design error identification are documented in the [download FIFO verification report (PDF)](https://github.com/JinELEC/FIFO_Verification/raw/main/report/FIFO_Verification_report.pdf).
+The complete verification methodology, assertion analysis, coverage results, and design issue identification are documented in the [download FIFO verification report (PDF)](https://github.com/JinELEC/FIFO_Verification/raw/main/report/FIFO_Verification_report.pdf).
