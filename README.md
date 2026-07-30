@@ -47,6 +47,25 @@ Three Assertions (SVA) were applied to verify FIFO functional behaviour and prot
 
 Among the three assertions, AS2 and AS3 were satisfied without any violation during simulation. However, AS1 reported 92 failures.
 
+## Repository Structure
+```
+FIFO_Verification/
+│
+├── rtl/
+│ └── fifo.sv # FIFO design under test (DUT)
+│
+├── tb/
+│ └── tb_fifo.sv # SystemVerilog class-based testbench
+│
+├── docs/
+│ ├── Testbench_Architecture.png # Testbench architecture diagram
+│ ├── coverage_summary.png # Coverage report summary
+│ └── coverage_report.txt # Detailed assertion and coverage results
+│
+├── report/
+  └── FIFO_Verification_report.pdf # Detailed verification report
+```
+
 ## Report
 Detailed assertion results and coverage analysis are available in 
 [coverage_report.txt](docs/coverage_report.txt).
