@@ -1,20 +1,27 @@
-## FIFO Verification 
+# FIFO Verification 
 
-This project is not only verify a FIFO (First-In-First-Out) memory, but also to understand and implement a SystemVerilog-class based testbench environment. 
+## Introduction
+This project verifies a parameterized synchronous FIFO using a SystemVerilog class-based verification environment. 
+A modular testbench architecture was built to validate the FIFO functionality through constrained-random stimulus, SystemVerilog Assertions (SVA), and coverage metrics. 
 
-The modular testbench architecture that includes the following components:
-- Generator: Generates different input stimulus to be driven to DUT
-- Driver: Drives stimulus to the DUT
-- Monitor: Observes DUT signals and capture design activity
-- Scoreboard: Compares DUT outputs with expected results
-- Environment: Contains all the verification components
-- Interface: Contains design signals that can be driven or monitored
+## Verification Methodology
+The modular testbench architecture includes the following components:
+- **Generator**: Generates different input stimulus to be driven to DUT
+- **Driver**: Drives stimulus to the DUT
+- **Monitor**: Observes DUT signals and capture design activity
+- **Scoreboard**: Compares DUT outputs with expected results
+- **Environment**: Contains all the verification components
+- **Interface**: Contains design signals that can be driven or monitored
 
-## DUT
-![FIFO](doc/FIFO.png)
-
-## Testbench Architecture
+### Testbench Architecture
 ![Testbench_Architecture](doc/Testbench_Architecture.PNG)
+
+### SystemVerilog Assertions (SVA)
+Assertions were implemented to automatically verify specific conditions or protocol of FIFO during simulation.
+
+### Coverage
+Coverage metrics were used to measure how much the design has been tested and evaluate the verification completeness. 
+
 
 ## Waveform
 ![FIFO waveform](doc/FIFO_waveform.png)
