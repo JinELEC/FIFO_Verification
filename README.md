@@ -21,7 +21,7 @@ The modular testbench architecture includes the following components:
 - **Interface:** Contains design signals that can be driven or monitored
 
 ### Testbench Architecture
-![Testbench_Architecture](docs/Testbench_Architecture.PNG)
+![Testbench_Architecture](docs/Testbench_Architecture.png)
 
 ### SystemVerilog Assertions (SVA)
 Assertions were implemented to automatically verify specific conditions or protocol of FIFO during simulation.
