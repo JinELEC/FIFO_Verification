@@ -22,8 +22,13 @@ Assertions were implemented to automatically verify specific conditions or proto
 ### Coverage
 Coverage metrics were used to measure how much the design has been tested and evaluate the verification completeness. 
 
-
-## Waveform
-![FIFO waveform](doc/FIFO_waveform.png)
-
-> Note: The simulation was performed using **EDA Playground**, as no SystemVerilog simulator.
+## Result
+### Coverage Summary
+| Metric | Value (%) |
+|--------|----------:|
+| Functional | 98.48 |
+| Statement | 100.00 |
+| Branch | 97.43 |
+| Condition | 94.73 |
+| Toggle | 98.11 |
+| Total | 93.96 |
