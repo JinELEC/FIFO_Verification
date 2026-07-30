@@ -3,7 +3,7 @@
 ## Contents
 - [Introduction](#introduction)
 - [Verification Methodology](#verification-methodology)
-- [Result](#result)
+- [Verification_Result](#result)
 - [Repository Structure](#repository-structure)
 - [Report](#report)
 
@@ -29,7 +29,7 @@ Assertions were implemented to automatically verify specific conditions or proto
 ### Coverage
 Coverage metrics were used to measure how much the design has been tested and evaluate the verification completeness. 
 
-## Result
+## Verification Result
 ### Coverage Summary
 | Metric | Value (%) |
 |--------|----------:|
