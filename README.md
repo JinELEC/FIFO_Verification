@@ -6,12 +6,12 @@ A modular testbench architecture was built to validate the FIFO functionality th
 
 ## Verification Methodology
 The modular testbench architecture includes the following components:
-- **Generator**: Generates different input stimulus to be driven to DUT
-- **Driver**: Drives stimulus to the DUT
-- **Monitor**: Observes DUT signals and capture design activity
-- **Scoreboard**: Compares DUT outputs with expected results
-- **Environment**: Contains all the verification components
-- **Interface**: Contains design signals that can be driven or monitored
+- **Generator:** Generates different input stimulus to be driven to DUT
+- **Driver:** Drives stimulus to the DUT
+- **Monitor:** Observes DUT signals and capture design activity
+- **Scoreboard:** Compares DUT outputs with expected results
+- **Environment:** Contains all the verification components
+- **Interface:** Contains design signals that can be driven or monitored
 
 ### Testbench Architecture
 ![Testbench_Architecture](doc/Testbench_Architecture.PNG)
