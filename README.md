@@ -55,7 +55,7 @@ FIFO_Verification/
 │ └── fifo.sv # DUT
 │
 ├── tb/
-│ └── tb_fifo.sv # SystemVerilog testbench (includes all components)
+│ └── tb_fifo.sv # SystemVerilog testbench (includes all verification components)
 │
 ├── docs/
 │ ├── Testbench_Architecture.png # Testbench architecture diagram
