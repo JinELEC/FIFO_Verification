@@ -32,3 +32,5 @@ Coverage metrics were used to measure how much the design has been tested and ev
 | Condition | 94.73 |
 | Toggle | 98.11 |
 | Total | 93.96 |
+
+![Coverage Report](doc/coverage_report_summpary.png)
