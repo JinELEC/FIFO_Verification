@@ -52,15 +52,15 @@ Among the three assertions, AS2 and AS3 were satisfied without any violations du
 FIFO_Verification/
 │
 ├── rtl/
-│ └── fifo.sv # DUT
+│ └── fifo.sv                      # DUT
 │
 ├── tb/
-│ └── tb_fifo.sv # SystemVerilog testbench (includes all verification components)
+│ └── tb_fifo.sv                   # SystemVerilog testbench (includes all verification components)
 │
 ├── docs/
-│ ├── Testbench_Architecture.png # Testbench architecture diagram
-│ ├── coverage_summary.png       # Coverage report summary
-│ └── coverage_report.txt        # Detailed assertion and coverage results
+│ ├── Testbench_Architecture.png   # Testbench architecture diagram
+│ ├── coverage_summary.png         # Coverage report summary
+│ └── coverage_report.txt          # Detailed assertion and coverage results
 │
 ├── report/
   └── FIFO_Verification_report.pdf # Detailed verification report
